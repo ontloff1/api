@@ -1,0 +1,9 @@
+services:
+  fiasapi:
+    build: .
+    container_name: fiasapi
+    ports:
+      - "5000:8080"
+    volumes:
+      - ./storage:/app/storage
+    restart: always
