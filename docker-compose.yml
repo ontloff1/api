@@ -1,9 +1,27 @@
+version: '3.8'
+
 services:
-  fiasapi:
-    build: .
-    container_name: fiasapi
+  postgres:
+    image: postgres
+    container_name: fias-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: fiasdb
     ports:
-      - "5000:8080"
+      - "5433:5432"
     volumes:
-      - ./storage:/app/storage
-    restart: always
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fias-fias-api
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:

@@ -1,31 +1,38 @@
 using Microsoft.AspNetCore.Mvc;
 using FiasApi.Services;
 
-namespace FiasApi.Controllers
+namespace FiasApi.Controllers;
+
+[ApiController]
+[Route("fias")]
+public class FiasController : ControllerBase
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class FiasController : ControllerBase
+    private readonly FiasService _service;
+
+    public FiasController(FiasService service)
     {
-        private readonly IFiasService _fiasService;
+        _service = service;
+    }
 
-        public FiasController(IFiasService fiasService)
-        {
-            _fiasService = fiasService;
-        }
+    [HttpGet("ping")]
+    public IActionResult Ping()
+    {
+        return Ok("FIAS API работает!");
+    }
 
-        [HttpGet("download")]
-        public async Task<IActionResult> Download([FromQuery] int region)
-        {
-            var result = await _fiasService.DownloadAndExtractAsync(region);
-            return Ok(result);
-        }
-
-        [HttpGet("process")]
-        public async Task<IActionResult> Process([FromQuery] string path, [FromQuery] int region)
-        {
-            var result = await _fiasService.ExtractFromLocalAsync(path, region);
-            return Ok(result);
+    [HttpPost("process/{regionCode}")]
+public async Task<IActionResult> ProcessRegion(string regionCode, [FromQuery] bool nextDay = false)
+{
+    try
+    {
+        var count = await _service.LoadRegionAsync(regionCode, nextDay);
+        return Ok(new { message = $"Загружено {count} записей для региона {regionCode}" });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = ex.Message });
+    }
+}
         }
     }
 }
